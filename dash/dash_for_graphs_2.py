@@ -8,16 +8,19 @@ df = pd.read_csv('data/gapminderDataFiveYear.csv')
 
 app = dash.Dash(__name__)
 
-year_options = [{'label':str(year), 'value':year} for year in df['year'].unique()]
+year_options = [{'label':year, 'value':year} for year in df['year'].unique()]
 continent_options = [{'label':continent, 'value':continent} for continent in df['continent'].unique()]
+
 
 app.layout = html.Div([
     dcc.Dropdown(id='year-picker',
-                 options=year_options,
+                 options=[year for year in year_options],
                  value=df['year'].min() # default value
+
                  ),
     dcc.Dropdown(id='continent-picker',
-                 options=continent_options,
+                 options=[{'label':i, 
+                           'value':i} for cont in continent_options for i in cont.values()],
                  value='Americas'
                  ),
     dcc.Graph(id='graph-with-slider'),
@@ -26,11 +29,11 @@ app.layout = html.Div([
 
 @app.callback(
         Output('graph-with-slider', 'figure'),
-        [#Input('year-picker', 'value'),
+        [Input('year-picker', 'value'),
          Input('continent-picker', 'value')]
 )
 def update_figure(selected_year, selected_continent):
-    filtered_df = df[(df['year']== selected_year) & df['continent']== selected_continent]
+    filtered_df = df[df['year']== selected_year & df['continent']== selected_continent]
 
     traces = []
     traces.append(go.Scatter(x=filtered_df['gdpPercap'],
