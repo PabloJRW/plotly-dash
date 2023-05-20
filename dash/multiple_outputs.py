@@ -37,6 +37,7 @@ def callback_b(colors_value):
 @app.callback(Output('display-image', 'src'),
               [Input('wheels', 'value'),
                Input('colors', 'value')])
+
 def callback_image(wheel, color):
     path = 'data/images/'
     return encode_image(path+df[(df['wheels']==wheel) & (df['color']==color)]['image'].values[0])
