@@ -16,7 +16,7 @@ app.layout = html.Div([
     html.Hr(),
     html.Div([
         html.H3(
-            children='Select stock symbol',
+            children='Select stock symbol'
         ),
         dcc.Dropdown(
             id='my-stock-picker',
@@ -24,7 +24,8 @@ app.layout = html.Div([
                       'value':value} for label, value in ticker_options.items()],
             value='MSFT'
         )
-    ], style={'display':'inline-block'}),
+    ], style={'display':'inline-block', 'verticalAlign':'top', 'width':'20%',
+              'paddingRight':'2%'}),
     html.Div([
         html.H3(
             children='Select a date range',
@@ -38,25 +39,29 @@ app.layout = html.Div([
         )
     ], style={'display':'inline-block'}),
     html.Hr(),
+    html.Div([
+        html.Button(
+            id='submit-button',
+            n_clicks=0,
+            children='Submit',
+            style={'fontSize':24, 'marginLeft':'30px'}
+        )
+    ], style={'display':'inline-block', 'verticalAlign':'top'}),
     dcc.Graph(
         id='my-graph',
-        figure={'data':[]},
-    ),
-    html.Div(id='ver')
+        figure={'data':[]}
+    )
+    
     
 ])
 
-@app.callback(Output('ver', 'children'),
-              Input('date-picker', 'start_date'))
-def verrr(start):
-    #start = datetime.strptime(start, '%Y-%m-%d')
-    return start[:10]
 
 @app.callback(Output('my-graph', 'figure'),
-              [Input('my-stock-picker', 'value'),
-               Input('date-picker', 'start_date'),
-               Input('date-picker', 'end_date')])
-def update_graph(stock_ticker, start_date, end_date):
+              [Input('submit-button', 'n_clicks')],
+              [State('my-stock-picker', 'value'),
+               State('date-picker', 'start_date'),
+               State('date-picker', 'end_date')])
+def update_graph(n_clicks, stock_ticker, start_date, end_date):
     start = datetime.strptime(start_date[:10], '%Y-%m-%d')
     end = datetime.strptime(end_date[:10], '%Y-%m-%d')
     df = yf.Ticker(stock_ticker).history(interval='1d',start=start, end=end)
