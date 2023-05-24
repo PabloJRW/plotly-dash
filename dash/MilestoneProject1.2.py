@@ -28,23 +28,32 @@ app.layout = html.Div([
     # Continene los elementos de selección para:
     #  - Stock Symbol 
     #  - Rango de fecha
+
            
-    ## STOCK SYMBOL ----------
+    ## STOCK TICKER ----------
         html.Div([ 
             html.H3(
                 children='Select stock symbol',
                 style={'margin':'1.5px 3px', 'paddingRight':'12px'}
             ),
-            dcc.Dropdown(
-                id='my-stock-picker',
+            dcc.Checklist(
+                id='stock-picker',
                 options=[{'label': l, 
                           'value': v} for l, v in ticker_options.items()],
-                value='BTC-USD',
-                multi=True, 
-                style={'width':'360px', 
-                       'marginRight':'12px'}
+                value=['TSLA'], 
+                inline=True,
+                style={'width':'300px', 
+                       'marginRight':'1px',
+                       'paddingTop':'6px', 
+                       'paddingRight':'12px',
+                       'paddingLeft':'12px',
+                       'display':'flex',
+                       'alignItems':'center',
+                       'justifyContent':'center'
+                       }
             )
-        ]
+        ],
+        style={'width':'420px', 'borderRight':'1px solid grey'}
         ),
     ## -----------------------------------------
 
@@ -52,7 +61,7 @@ app.layout = html.Div([
         html.Div([
             html.H3(
                 children='Select a date range',
-                style={'margin':'1.5px 3px', 'paddingLeft':'12px'}
+                style={'margin':'1.5px 12px'}
             ),
             dcc.DatePickerRange(
                 id='date-picker',
@@ -60,29 +69,16 @@ app.layout = html.Div([
                 max_date_allowed=datetime.today(),
                 start_date=datetime(2022,1,1),
                 end_date=datetime.today(),
-                style={'width':'400px',
-                       'paddingLeft':'12px'}
+                style={'marginLeft':'24px',
+                       'height':'90px',
+                       'position':'absolute'}
             )
         ], 
-        style={'text-align':'center','margin':'1px 3px', 'display':'inline-block', 
-               'borderRight':'1px solid black', 'width':'42%'},
+        style={'margin':'1px 1px', 'display':'inline-block', 
+               'borderRight':'1px solid grey', 'width':'321px'},
         ),
-    ## -----------------------------------------
-
-    ## SUBMIT BUTTON ---------------------------
-        html.Div([
-            html.Button(
-                id='submit-button',
-                n_clicks=0,
-                children='Submit',
-                style={'fontSize':'10px'}
-            )
-        ], 
-        style={'display': 'flex', 'justify-content': 'center',
-               'margin':'1px 1px', 'padding':'3px 3px'}
-        )
     ],
-    style={'display':'flex'}
+    style={'height':'72px', 'display':'flex'}
     ),
     ### FINAL DIV - contenedor de selección de opciones
     ### *********
@@ -102,21 +98,20 @@ app.layout = html.Div([
 
 
 @app.callback(Output('my-graph', 'figure'),
-              [Input('submit-button', 'n_clicks')],
-              [State('my-stock-picker', 'value'),
-               State('date-picker', 'start_date'),
-               State('date-picker', 'end_date')])
-def update_graph(n_clicks, stock_ticker, start_date, end_date):
-    start = datetime.strptime(start_date[:10], '%Y-%m-%d')
-    end = datetime.strptime(end_date[:10], '%Y-%m-%d')
+              [Input('stock-picker', 'value'),
+               Input('date-picker', 'start_date'),
+               Input('date-picker', 'end_date')])
+def update_graph(stock_ticker, start_date, end_date):
+    start_date = datetime.strptime(start_date[:10], '%Y-%m-%d')
+    end_date = datetime.strptime(end_date[:10], '%Y-%m-%d')
 
-    traces = []   
+    traces = [] 
     if len(stock_ticker) > 1:
         for tick in stock_ticker:
-            df = yf.Ticker(tick).history(interval='1d',start=start, end=end)
+            df = yf.Ticker(tick).history(interval='1d',start=start_date, end=end_date)
             traces.append({'x':df.index, 'y':df['Close'], 'name':tick})
     elif len(stock_ticker) == 1:
-        df = yf.Ticker(stock_ticker[0]).history(interval='1d',start=start, end=end)
+        df = yf.Ticker(stock_ticker[0]).history(interval='1d',start=start_date, end=end_date)
         traces.append({'x':df.index, 'y':df['Close']})
         
     fig = {'data':traces, 
