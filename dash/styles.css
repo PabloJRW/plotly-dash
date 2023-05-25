@@ -1,0 +1,12 @@
+#header {
+    display: flex; 
+    justify-content: center;
+    padding-top: 1px;
+    margin: 10px 0px;
+}
+
+
+.stock-picker input[type="checkbox"]{
+    width: 30px;
+    height: 20px;
+}
